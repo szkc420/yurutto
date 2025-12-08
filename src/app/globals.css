@@ -1,14 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #1a1814;
+  --foreground: #f5f0e8;
+  /* 温かみのあるカラーパレット（背景の水彩画に合わせて） */
+  --warm-cream: #f5f0e8;
+  --warm-amber: #d4a574;
+  --warm-orange: #e8a862;
+  --warm-brown: #8b6914;
+  --soft-green: #7a9b76;
+  --night-blue: #2d3a4a;
+  --lamp-glow: rgba(255, 213, 145, 0.15);
+  --paper-bg: rgba(245, 240, 232, 0.08);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-zen-maru), var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -19,7 +28,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-zen-maru), var(--font-klee), sans-serif;
   overflow-x: hidden;
 }
 
@@ -33,12 +42,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(212, 165, 116, 0.3);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(212, 165, 116, 0.5);
 }
 
 /* フォーカス時のアウトライン */
@@ -59,4 +68,33 @@ button:focus {
 
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ランプのような温かいグロー */
+@keyframes lamp-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(255, 200, 120, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(255, 200, 120, 0.6));
+  }
+}
+
+.lamp-glow {
+  animation: lamp-glow 3s ease-in-out infinite;
+}
+
+/* 紙のようなテクスチャ背景 */
+.paper-texture {
+  background: linear-gradient(135deg,
+    rgba(245, 240, 232, 0.06) 0%,
+    rgba(245, 240, 232, 0.02) 50%,
+    rgba(245, 240, 232, 0.06) 100%
+  );
+  backdrop-filter: blur(8px);
+}
+
+/* 温かみのあるボーダー */
+.warm-border {
+  border: 1px solid rgba(212, 165, 116, 0.2);
 }

@@ -32,12 +32,25 @@ export default function Clock() {
   };
 
   return (
-    <div className="text-white">
-      <div className="text-sm text-white/60 drop-shadow-md">
-        {formatDate(time)}
-      </div>
-      <div className="text-4xl font-light tracking-wider drop-shadow-lg">
-        {formatTime(time)}
+    <div className="relative">
+      {/* 温かみのあるグロー背景 */}
+      <div className="absolute -inset-4 bg-gradient-to-br from-amber-500/10 to-orange-500/5 rounded-2xl blur-xl" />
+
+      <div className="relative text-amber-50/90">
+        {/* 日付 */}
+        <div className="text-sm text-amber-200/60 tracking-wide" style={{ textShadow: '0 2px 8px rgba(255, 180, 100, 0.3)' }}>
+          {formatDate(time)}
+        </div>
+        {/* 時刻 */}
+        <div
+          className="text-5xl font-light tracking-wider lamp-glow"
+          style={{
+            textShadow: '0 0 20px rgba(255, 200, 120, 0.4), 0 0 40px rgba(255, 180, 100, 0.2)',
+            color: '#fff5e6'
+          }}
+        >
+          {formatTime(time)}
+        </div>
       </div>
     </div>
   );

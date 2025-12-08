@@ -129,13 +129,19 @@ export default function AudioPlayer() {
 
   return (
     <>
-      {/* 下部の音楽バー */}
-      <div className="fixed bottom-0 left-0 right-0 bg-black/70 backdrop-blur-md border-t border-white/10">
+      {/* 下部の音楽バー - 温かみのある木目調デザイン */}
+      <div
+        className="fixed bottom-0 left-0 right-0 backdrop-blur-md border-t"
+        style={{
+          background: "linear-gradient(to top, rgba(30, 25, 20, 0.95), rgba(40, 35, 28, 0.9))",
+          borderColor: "rgba(212, 165, 116, 0.2)"
+        }}
+      >
         <div className="flex items-center justify-between px-4 py-3 max-w-screen-xl mx-auto">
           {/* 左: メニューボタン */}
           <button
             onClick={() => setShowPanel(!showPanel)}
-            className="p-2 text-white/60 hover:text-white transition-colors drop-shadow-lg"
+            className="p-2 text-amber-200/50 hover:text-amber-100 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
@@ -146,7 +152,7 @@ export default function AudioPlayer() {
           <div className="flex items-center gap-4 flex-1 justify-center">
             <div className="flex items-center gap-3">
               {/* 前の曲 */}
-              <button className="p-1 text-white/40 hover:text-white/80 transition-colors">
+              <button className="p-1 text-amber-300/30 hover:text-amber-200/70 transition-colors">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
                 </svg>
@@ -163,21 +169,27 @@ export default function AudioPlayer() {
                     if (selectedAmbient) setIsAmbientPlaying(true);
                   }
                 }}
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                className="w-10 h-10 rounded-full flex items-center justify-center transition-all"
+                style={{
+                  background: isPlaying
+                    ? "linear-gradient(135deg, rgba(255, 180, 100, 0.3), rgba(255, 150, 80, 0.2))"
+                    : "rgba(255, 200, 150, 0.1)",
+                  boxShadow: isPlaying ? "0 0 15px rgba(255, 180, 100, 0.3)" : "none"
+                }}
               >
                 {isPlaying ? (
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-amber-100" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                   </svg>
                 ) : (
-                  <svg className="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 ml-0.5 text-amber-200/70" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 )}
               </button>
 
               {/* 次の曲 */}
-              <button className="p-1 text-white/40 hover:text-white/80 transition-colors">
+              <button className="p-1 text-amber-300/30 hover:text-amber-200/70 transition-colors">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
                 </svg>
@@ -186,13 +198,16 @@ export default function AudioPlayer() {
 
             {/* 曲名 + プログレスバー */}
             <div className="flex-1 max-w-md">
-              <div className="text-white/80 text-sm mb-1 text-center">
+              <div className="text-amber-100/70 text-sm mb-1 text-center">
                 {nowPlayingText()}
               </div>
               {/* 再生バー（音楽用） */}
               {isMusicPlaying && selectedMusic && (
-                <div className="w-full h-1 bg-white/20 rounded-full overflow-hidden">
-                  <div className="h-full bg-white/60 rounded-full w-1/3 animate-pulse" />
+                <div className="w-full h-1 bg-amber-900/30 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full w-1/3 animate-pulse"
+                    style={{ background: "linear-gradient(90deg, rgba(255, 180, 100, 0.6), rgba(255, 200, 120, 0.8))" }}
+                  />
                 </div>
               )}
             </div>
@@ -203,7 +218,7 @@ export default function AudioPlayer() {
             {/* 音楽プレイヤー表示 */}
             <button
               onClick={() => setShowMusicPlayer(!showMusicPlayer)}
-              className={`p-2 transition-colors ${showMusicPlayer ? 'text-white' : 'text-white/40 hover:text-white/80'}`}
+              className={`p-2 transition-colors ${showMusicPlayer ? "text-amber-200" : "text-amber-300/40 hover:text-amber-200/70"}`}
               title="音楽プレイヤーを表示"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,7 +229,7 @@ export default function AudioPlayer() {
             {/* 環境音プレイヤー表示 */}
             <button
               onClick={() => setShowAmbientPlayer(!showAmbientPlayer)}
-              className={`p-2 transition-colors ${showAmbientPlayer ? 'text-white' : 'text-white/40 hover:text-white/80'}`}
+              className={`p-2 transition-colors ${showAmbientPlayer ? "text-amber-200" : "text-amber-300/40 hover:text-amber-200/70"}`}
               title="環境音プレイヤーを表示"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,12 +242,18 @@ export default function AudioPlayer() {
 
       {/* 音源選択パネル */}
       {showPanel && (
-        <div className="fixed bottom-16 left-4 bg-black/90 backdrop-blur-md rounded-xl p-4 w-80 border border-white/20 shadow-2xl">
+        <div
+          className="fixed bottom-16 left-4 backdrop-blur-md rounded-2xl p-4 w-80 shadow-2xl"
+          style={{
+            background: "linear-gradient(135deg, rgba(45, 40, 35, 0.95), rgba(35, 30, 25, 0.98))",
+            border: "1px solid rgba(212, 165, 116, 0.2)"
+          }}
+        >
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-white font-medium">音源設定</h3>
+            <h3 className="text-amber-100/80 font-medium">音源設定</h3>
             <button
               onClick={() => setShowPanel(false)}
-              className="text-white/40 hover:text-white transition-colors"
+              className="text-amber-300/40 hover:text-amber-200 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -243,15 +264,15 @@ export default function AudioPlayer() {
           {/* 音楽セクション */}
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-white/60">音楽</span>
+              <span className="text-sm text-amber-200/50">音楽</span>
               <button
                 onClick={toggleMusic}
                 className={`w-8 h-4 rounded-full transition-colors ${
-                  isMusicPlaying ? "bg-white/60" : "bg-white/20"
+                  isMusicPlaying ? "bg-amber-500/60" : "bg-amber-900/40"
                 }`}
               >
                 <div
-                  className={`w-3 h-3 bg-white rounded-full transition-transform mx-0.5 ${
+                  className={`w-3 h-3 bg-amber-100 rounded-full transition-transform mx-0.5 ${
                     isMusicPlaying ? "translate-x-4" : ""
                   }`}
                 />
@@ -262,11 +283,12 @@ export default function AudioPlayer() {
                 <button
                   key={preset.id}
                   onClick={() => selectMusic(preset)}
-                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                  className={`px-3 py-1.5 text-xs rounded-lg transition-all ${
                     selectedMusic?.id === preset.id
-                      ? "bg-white/30 text-white"
-                      : "bg-white/10 text-white/60 hover:bg-white/20"
+                      ? "bg-amber-500/30 text-amber-100"
+                      : "bg-amber-900/30 text-amber-200/50 hover:bg-amber-900/50"
                   }`}
+                  style={selectedMusic?.id === preset.id ? { boxShadow: "0 0 8px rgba(255, 180, 100, 0.2)" } : {}}
                 >
                   {preset.name}
                 </button>
@@ -277,15 +299,15 @@ export default function AudioPlayer() {
           {/* 環境音セクション */}
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-white/60">環境音</span>
+              <span className="text-sm text-amber-200/50">環境音</span>
               <button
                 onClick={toggleAmbient}
                 className={`w-8 h-4 rounded-full transition-colors ${
-                  isAmbientPlaying ? "bg-white/60" : "bg-white/20"
+                  isAmbientPlaying ? "bg-amber-500/60" : "bg-amber-900/40"
                 }`}
               >
                 <div
-                  className={`w-3 h-3 bg-white rounded-full transition-transform mx-0.5 ${
+                  className={`w-3 h-3 bg-amber-100 rounded-full transition-transform mx-0.5 ${
                     isAmbientPlaying ? "translate-x-4" : ""
                   }`}
                 />
@@ -296,11 +318,12 @@ export default function AudioPlayer() {
                 <button
                   key={preset.id}
                   onClick={() => selectAmbient(preset)}
-                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                  className={`px-3 py-1.5 text-xs rounded-lg transition-all ${
                     selectedAmbient?.id === preset.id
-                      ? "bg-white/30 text-white"
-                      : "bg-white/10 text-white/60 hover:bg-white/20"
+                      ? "bg-amber-500/30 text-amber-100"
+                      : "bg-amber-900/30 text-amber-200/50 hover:bg-amber-900/50"
                   }`}
+                  style={selectedAmbient?.id === preset.id ? { boxShadow: "0 0 8px rgba(255, 180, 100, 0.2)" } : {}}
                 >
                   {preset.name}
                 </button>
@@ -310,20 +333,20 @@ export default function AudioPlayer() {
 
           {/* カスタムURL */}
           <div>
-            <span className="text-sm text-white/60 block mb-2">カスタムURL</span>
+            <span className="text-sm text-amber-200/50 block mb-2">カスタムURL</span>
             <div className="flex gap-1 mb-2">
               <button
                 onClick={() => setCustomType("music")}
-                className={`px-2 py-1 text-xs rounded ${
-                  customType === "music" ? "bg-white/20" : "bg-white/5"
+                className={`px-2 py-1 text-xs rounded-lg transition-colors ${
+                  customType === "music" ? "bg-amber-500/30 text-amber-100" : "bg-amber-900/30 text-amber-200/40"
                 }`}
               >
                 音楽
               </button>
               <button
                 onClick={() => setCustomType("ambient")}
-                className={`px-2 py-1 text-xs rounded ${
-                  customType === "ambient" ? "bg-white/20" : "bg-white/5"
+                className={`px-2 py-1 text-xs rounded-lg transition-colors ${
+                  customType === "ambient" ? "bg-amber-500/30 text-amber-100" : "bg-amber-900/30 text-amber-200/40"
                 }`}
               >
                 環境音
@@ -335,11 +358,11 @@ export default function AudioPlayer() {
                 value={customUrl}
                 onChange={(e) => setCustomUrl(e.target.value)}
                 placeholder="YouTube/Spotify URL"
-                className="flex-1 bg-white/10 rounded px-2 py-1 text-xs text-white placeholder-white/40 border border-white/10 focus:outline-none focus:border-white/30"
+                className="flex-1 bg-amber-900/30 rounded-lg px-3 py-1.5 text-xs text-amber-50 placeholder-amber-200/30 border border-amber-500/20 focus:outline-none focus:border-amber-500/40"
               />
               <button
                 onClick={handleCustomUrl}
-                className="bg-white/20 hover:bg-white/30 rounded px-3 text-xs transition-colors"
+                className="bg-amber-500/30 hover:bg-amber-500/40 rounded-lg px-3 text-xs text-amber-100 transition-colors"
               >
                 追加
               </button>
@@ -347,7 +370,7 @@ export default function AudioPlayer() {
           </div>
 
           {/* 注意書き */}
-          <p className="text-white/30 text-xs mt-4">
+          <p className="text-amber-200/20 text-xs mt-4">
             ※ 音量調節はプレイヤー内で行えます
           </p>
         </div>
@@ -355,12 +378,18 @@ export default function AudioPlayer() {
 
       {/* 音楽プレイヤー（フローティング） */}
       {showMusicPlayer && isMusicPlaying && selectedMusic && (
-        <div className="fixed bottom-20 right-4 bg-black/90 backdrop-blur-md rounded-xl overflow-hidden border border-white/20 shadow-2xl">
-          <div className="flex items-center justify-between px-3 py-2 bg-white/5">
-            <span className="text-white/60 text-xs">音楽: {selectedMusic.name}</span>
+        <div
+          className="fixed bottom-20 right-4 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl"
+          style={{
+            background: "linear-gradient(135deg, rgba(45, 40, 35, 0.95), rgba(35, 30, 25, 0.98))",
+            border: "1px solid rgba(212, 165, 116, 0.2)"
+          }}
+        >
+          <div className="flex items-center justify-between px-3 py-2 bg-amber-900/20">
+            <span className="text-amber-200/60 text-xs">音楽: {selectedMusic.name}</span>
             <button
               onClick={() => setShowMusicPlayer(false)}
-              className="text-white/40 hover:text-white transition-colors"
+              className="text-amber-300/40 hover:text-amber-200 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -378,12 +407,18 @@ export default function AudioPlayer() {
 
       {/* 環境音プレイヤー（フローティング） */}
       {showAmbientPlayer && isAmbientPlaying && selectedAmbient && (
-        <div className="fixed bottom-20 right-24 bg-black/90 backdrop-blur-md rounded-xl overflow-hidden border border-white/20 shadow-2xl">
-          <div className="flex items-center justify-between px-3 py-2 bg-white/5">
-            <span className="text-white/60 text-xs">環境音: {selectedAmbient.name}</span>
+        <div
+          className="fixed bottom-20 right-24 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl"
+          style={{
+            background: "linear-gradient(135deg, rgba(45, 40, 35, 0.95), rgba(35, 30, 25, 0.98))",
+            border: "1px solid rgba(212, 165, 116, 0.2)"
+          }}
+        >
+          <div className="flex items-center justify-between px-3 py-2 bg-amber-900/20">
+            <span className="text-amber-200/60 text-xs">環境音: {selectedAmbient.name}</span>
             <button
               onClick={() => setShowAmbientPlayer(false)}
-              className="text-white/40 hover:text-white transition-colors"
+              className="text-amber-300/40 hover:text-amber-200 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
