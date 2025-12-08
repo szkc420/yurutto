@@ -323,35 +323,89 @@ export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* オーバーレイ */}
+      {/* オーバーレイ - 夜の書斎の暗さ */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 backdrop-blur-sm"
+        style={{
+          background: "radial-gradient(ellipse at center, rgba(26, 24, 20, 0.85) 0%, rgba(15, 12, 10, 0.95) 100%)"
+        }}
         onClick={onClose}
       />
 
-      {/* モーダル */}
-      <div className="relative bg-zinc-900 rounded-2xl w-full max-w-2xl mx-4 shadow-2xl border border-white/10 max-h-[80vh] overflow-hidden flex flex-col">
+      {/* モーダル - 古い革表紙の日記帳 */}
+      <div
+        className="relative w-full max-w-2xl mx-4 max-h-[85vh] overflow-hidden flex flex-col ink-spread"
+        style={{
+          background: "linear-gradient(165deg, rgba(55, 48, 40, 0.98) 0%, rgba(42, 36, 28, 0.99) 50%, rgba(50, 42, 34, 0.98) 100%)",
+          borderRadius: "16px",
+          border: "1px solid rgba(139, 111, 71, 0.4)",
+          boxShadow: `
+            0 25px 60px rgba(0, 0, 0, 0.5),
+            0 10px 30px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 213, 145, 0.08),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.3)
+          `
+        }}
+      >
+        {/* 本の背表紙デコレーション */}
+        <div
+          className="absolute left-0 top-0 bottom-0 w-3 rounded-l-2xl"
+          style={{
+            background: "linear-gradient(90deg, rgba(107, 68, 35, 0.6), rgba(139, 111, 71, 0.4))",
+            borderRight: "1px solid rgba(212, 165, 116, 0.2)"
+          }}
+        />
+        <div
+          className="absolute left-3 top-4 bottom-4 w-px"
+          style={{ background: "rgba(255, 213, 145, 0.15)" }}
+        />
+
         {/* ヘッダー */}
-        <div className="flex items-center justify-between p-4 border-b border-white/10">
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-medium text-white">ジャーナル</h2>
-            {saving ? (
-              <span className="text-xs text-white/40">保存中...</span>
-            ) : syncing ? (
-              <span className="text-xs text-white/30">同期中...</span>
-            ) : loadFailed ? (
-              <span className="text-xs text-yellow-400">読み込み失敗</span>
-            ) : (
-              <span className="text-xs text-green-400">読み込み完了</span>
-            )}
+        <div
+          className="flex items-center justify-between p-4 pl-8"
+          style={{ borderBottom: "1px solid rgba(139, 111, 71, 0.25)" }}
+        >
+          <div className="flex items-center gap-3">
+            {/* 本のアイコン */}
+            <div
+              className="w-9 h-9 rounded-lg flex items-center justify-center"
+              style={{
+                background: "linear-gradient(135deg, rgba(212, 165, 116, 0.15), rgba(139, 111, 71, 0.1))",
+                border: "1px solid rgba(212, 165, 116, 0.25)"
+              }}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="rgba(255, 213, 145, 0.8)" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <div>
+              <h2
+                className="text-lg font-medium tracking-wide"
+                style={{ color: "#ffd591", textShadow: "0 2px 4px rgba(0, 0, 0, 0.4)" }}
+              >
+                ジャーナル
+              </h2>
+              <span
+                className="text-xs"
+                style={{
+                  color: saving ? "rgba(255, 213, 145, 0.6)" :
+                         syncing ? "rgba(212, 165, 116, 0.4)" :
+                         loadFailed ? "rgba(255, 180, 100, 0.7)" :
+                         "rgba(122, 155, 118, 0.7)"
+                }}
+              >
+                {saving ? "保存中..." : syncing ? "同期中..." : loadFailed ? "読み込み失敗" : "同期完了"}
+              </span>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             {user && (
               <div className="flex items-center gap-2">
-                <span className="text-sm text-white/60">{user.email}</span>
+                <span className="text-sm" style={{ color: "rgba(212, 165, 116, 0.5)" }}>{user.email}</span>
                 <button
                   onClick={signOut}
-                  className="text-xs text-white/40 hover:text-white transition-colors"
+                  className="text-xs transition-all hover:scale-105"
+                  style={{ color: "rgba(212, 165, 116, 0.4)" }}
                 >
                   ログアウト
                 </button>
@@ -359,59 +413,96 @@ export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
             )}
             <button
               onClick={onClose}
-              className="text-white/40 hover:text-white transition-colors"
+              className="p-2 rounded-lg transition-all hover:scale-110"
+              style={{ color: "rgba(212, 165, 116, 0.5)" }}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
         </div>
 
-        {/* 日付ナビゲーション */}
-        <div className="flex items-center justify-between px-4 py-3 bg-white/5">
+        {/* 日付ナビゲーション - ページをめくるような */}
+        <div
+          className="flex items-center justify-between px-8 py-3"
+          style={{
+            background: "linear-gradient(180deg, rgba(42, 37, 32, 0.5), transparent)",
+            borderBottom: "1px dashed rgba(139, 111, 71, 0.2)"
+          }}
+        >
           <button
             onClick={() => changeDate(-1)}
-            className="p-1 text-white/60 hover:text-white transition-colors"
+            className="p-2 rounded-lg transition-all hover:scale-110"
+            style={{ color: "rgba(212, 165, 116, 0.6)" }}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
           <div className="text-center">
-            <div className="text-white font-medium">{formatDisplayDate(selectedDate)}</div>
-            {isToday && <span className="text-xs text-white/40">今日</span>}
+            <div
+              className="font-medium tracking-wide"
+              style={{ color: "#ffd591", textShadow: "0 1px 2px rgba(0, 0, 0, 0.3)" }}
+            >
+              {formatDisplayDate(selectedDate)}
+            </div>
+            {isToday && (
+              <span
+                className="text-xs"
+                style={{ color: "rgba(122, 155, 118, 0.7)" }}
+              >
+                今日
+              </span>
+            )}
           </div>
           <button
             onClick={() => changeDate(1)}
-            className="p-1 text-white/60 hover:text-white transition-colors"
+            className="p-2 rounded-lg transition-all hover:scale-110"
+            style={{ color: "rgba(212, 165, 116, 0.6)" }}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
 
-        {/* コンテンツ */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* コンテンツ - 古い紙のようなページ */}
+        <div className="flex-1 overflow-y-auto p-6 pl-8 space-y-5">
           {/* 読み込み失敗警告 */}
           {loadFailed && (
-            <div className="bg-yellow-500/20 border border-yellow-500/40 rounded-lg p-3 text-sm">
-              <div className="text-yellow-200 mb-2">
+            <div
+              className="rounded-xl p-4 text-sm"
+              style={{
+                background: "rgba(200, 150, 80, 0.1)",
+                border: "1px solid rgba(200, 150, 80, 0.3)"
+              }}
+            >
+              <div className="mb-3" style={{ color: "rgba(255, 200, 150, 0.9)" }}>
                 データの読み込みに失敗しました。サーバーに既存のデータがある可能性があります。
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={retryLoad}
                   disabled={syncing}
-                  className="px-3 py-1 bg-yellow-500/30 hover:bg-yellow-500/50 rounded text-yellow-100 transition-colors disabled:opacity-50"
+                  className="px-4 py-1.5 rounded-lg transition-all hover:scale-105 disabled:opacity-50"
+                  style={{
+                    background: "rgba(200, 150, 80, 0.2)",
+                    border: "1px solid rgba(200, 150, 80, 0.4)",
+                    color: "rgba(255, 200, 150, 0.9)"
+                  }}
                 >
                   {syncing ? "読み込み中..." : "再読み込み"}
                 </button>
                 {hasUserEdited && (
                   <button
                     onClick={forceSave}
-                    className="px-3 py-1 bg-red-500/30 hover:bg-red-500/50 rounded text-red-100 transition-colors"
+                    className="px-4 py-1.5 rounded-lg transition-all hover:scale-105"
+                    style={{
+                      background: "rgba(180, 100, 80, 0.2)",
+                      border: "1px solid rgba(180, 100, 80, 0.4)",
+                      color: "rgba(255, 160, 140, 0.9)"
+                    }}
                   >
                     現在の内容で上書き保存
                   </button>
@@ -421,89 +512,136 @@ export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
           )}
 
           {loading ? (
-            <div className="space-y-4 animate-pulse">
-              {/* スケルトン: 日記エリア */}
+            <div className="space-y-5 animate-pulse">
               <div>
-                <div className="h-4 w-24 bg-white/10 rounded mb-2"></div>
-                <div className="h-32 bg-white/5 rounded-lg"></div>
+                <div className="h-4 w-28 rounded mb-3" style={{ background: "rgba(139, 111, 71, 0.2)" }} />
+                <div className="h-36 rounded-xl" style={{ background: "rgba(42, 37, 32, 0.5)" }} />
               </div>
-              {/* スケルトン: タスクエリア */}
               <div>
-                <div className="h-4 w-20 bg-white/10 rounded mb-2"></div>
-                <div className="bg-white/5 rounded-lg p-3 space-y-2">
-                  <div className="h-5 bg-white/10 rounded w-3/4"></div>
-                  <div className="h-5 bg-white/10 rounded w-1/2"></div>
-                  <div className="h-5 bg-white/10 rounded w-2/3"></div>
+                <div className="h-4 w-20 rounded mb-3" style={{ background: "rgba(139, 111, 71, 0.2)" }} />
+                <div className="rounded-xl p-4 space-y-3" style={{ background: "rgba(42, 37, 32, 0.5)" }}>
+                  <div className="h-5 rounded w-3/4" style={{ background: "rgba(139, 111, 71, 0.15)" }} />
+                  <div className="h-5 rounded w-1/2" style={{ background: "rgba(139, 111, 71, 0.15)" }} />
                 </div>
               </div>
             </div>
           ) : (
             <>
-              {/* 日記 */}
+              {/* 日記セクション - 万年筆で書いたような */}
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm text-white/60">今日の出来事</label>
+                <div className="flex items-center gap-2 mb-3">
+                  <svg className="w-4 h-4" fill="none" stroke="rgba(255, 213, 145, 0.6)" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                  </svg>
+                  <label
+                    className="text-sm tracking-wide"
+                    style={{ color: "rgba(212, 165, 116, 0.7)" }}
+                  >
+                    今日の出来事
+                  </label>
                 </div>
                 <textarea
                   value={diary}
                   onChange={(e) => handleDiaryChange(e.target.value)}
                   placeholder="今日はどんな一日でしたか？"
-                  className="w-full h-32 bg-white/5 rounded-lg px-4 py-3 text-white placeholder-white/30 border border-white/10 focus:outline-none focus:border-white/30 resize-none"
+                  className="w-full h-36 rounded-xl px-4 py-3 text-sm transition-all resize-none"
+                  style={{
+                    background: "rgba(42, 37, 32, 0.6)",
+                    border: "1px solid rgba(139, 111, 71, 0.25)",
+                    color: "rgba(245, 240, 232, 0.9)",
+                    caretColor: "#ffd591"
+                  }}
                 />
               </div>
 
-              {/* タスク */}
+              {/* タスクセクション - チェックリスト */}
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm text-white/60">タスク</label>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="rgba(255, 213, 145, 0.6)" viewBox="0 0 24 24" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <label
+                      className="text-sm tracking-wide"
+                      style={{ color: "rgba(212, 165, 116, 0.7)" }}
+                    >
+                      タスク
+                    </label>
+                  </div>
                   {isToday && (
                     <button
                       onClick={copyTasksFromWorkScreen}
-                      className="text-xs text-white/40 hover:text-white transition-colors"
+                      className="text-xs transition-all hover:scale-105"
+                      style={{ color: "rgba(212, 165, 116, 0.5)" }}
                     >
                       作業画面からコピー
                     </button>
                   )}
                 </div>
-                <div className="bg-white/5 rounded-lg p-3 border border-white/10 space-y-2">
-                  {/* タスク一覧 */}
-                  {tasks.map((task) => (
-                    <div key={task.id} className="flex items-center gap-2 group">
+                <div
+                  className="rounded-xl p-4 space-y-2"
+                  style={{
+                    background: "rgba(42, 37, 32, 0.6)",
+                    border: "1px solid rgba(139, 111, 71, 0.25)"
+                  }}
+                >
+                  {tasks.map((task, index) => (
+                    <div
+                      key={task.id}
+                      className="flex items-center gap-3 py-2 group"
+                      style={{
+                        animation: `fadeIn 0.3s ease ${index * 0.05}s both`,
+                        borderBottom: "1px dashed rgba(139, 111, 71, 0.15)"
+                      }}
+                    >
                       <button
                         onClick={() => toggleTask(task.id)}
-                        className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${
-                          task.completed
-                            ? "bg-white/60 border-white/60"
-                            : "border-white/40 hover:border-white/60"
-                        }`}
+                        className="w-5 h-5 rounded flex-shrink-0 flex items-center justify-center transition-all"
+                        style={{
+                          background: task.completed
+                            ? "linear-gradient(135deg, rgba(122, 155, 118, 0.5), rgba(168, 213, 186, 0.4))"
+                            : "transparent",
+                          border: task.completed
+                            ? "1.5px solid rgba(168, 213, 186, 0.6)"
+                            : "1.5px solid rgba(212, 165, 116, 0.4)",
+                          boxShadow: task.completed ? "0 0 8px rgba(122, 155, 118, 0.3)" : "none"
+                        }}
                       >
                         {task.completed && (
-                          <svg className="w-2.5 h-2.5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          <svg className="w-3 h-3" fill="none" stroke="#f0fff5" viewBox="0 0 24 24" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                           </svg>
                         )}
                       </button>
                       <span
-                        className={`flex-1 text-sm ${
-                          task.completed ? "line-through text-white/40" : "text-white/80"
-                        }`}
+                        className="flex-1 text-sm transition-all"
+                        style={{
+                          color: task.completed ? "rgba(212, 165, 116, 0.35)" : "rgba(245, 240, 232, 0.85)",
+                          textDecorationLine: task.completed ? "line-through" : "none",
+                          textDecorationStyle: "solid",
+                          textDecorationColor: "rgba(139, 111, 71, 0.4)"
+                        }}
                       >
                         {task.text}
                       </span>
                       <button
                         onClick={() => deleteTask(task.id)}
-                        className="opacity-0 group-hover:opacity-100 text-white/30 hover:text-white/60 transition-all"
+                        className="opacity-0 group-hover:opacity-100 p-1 transition-all hover:scale-110"
+                        style={{ color: "rgba(212, 165, 116, 0.4)" }}
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                     </div>
                   ))}
 
                   {/* 新規タスク入力 */}
-                  <div className="flex items-center gap-2 pt-1">
-                    <div className="w-4 h-4 rounded border border-white/20 flex-shrink-0" />
+                  <div className="flex items-center gap-3 pt-2">
+                    <div
+                      className="w-5 h-5 rounded flex-shrink-0"
+                      style={{ border: "1.5px dashed rgba(139, 111, 71, 0.3)" }}
+                    />
                     <input
                       type="text"
                       value={newTaskText}
@@ -515,15 +653,23 @@ export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
                         }
                       }}
                       placeholder="新しいタスクを追加..."
-                      className="flex-1 bg-transparent text-sm text-white placeholder-white/30 focus:outline-none"
+                      className="flex-1 bg-transparent text-sm focus:outline-none"
+                      style={{
+                        color: "rgba(245, 240, 232, 0.85)",
+                        caretColor: "#ffd591"
+                      }}
                     />
                     {newTaskText.trim() && (
                       <button
                         onClick={addTask}
-                        className="text-white/40 hover:text-white transition-colors"
+                        className="p-1 rounded-lg transition-all hover:scale-110"
+                        style={{
+                          color: "#ffd591",
+                          background: "rgba(255, 213, 145, 0.1)"
+                        }}
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                         </svg>
                       </button>
                     )}
@@ -533,6 +679,14 @@ export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
             </>
           )}
         </div>
+
+        {/* 装飾的な下部ライン */}
+        <div
+          className="h-1.5 rounded-b-2xl"
+          style={{
+            background: "linear-gradient(90deg, rgba(107, 68, 35, 0.4), rgba(139, 111, 71, 0.3), rgba(107, 68, 35, 0.4))"
+          }}
+        />
       </div>
     </div>
   );
