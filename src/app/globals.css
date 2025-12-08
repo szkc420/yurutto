@@ -3,15 +3,25 @@
 :root {
   --background: #1a1814;
   --foreground: #f5f0e8;
-  /* 温かみのあるカラーパレット（背景の水彩画に合わせて） */
-  --warm-cream: #f5f0e8;
-  --warm-amber: #d4a574;
-  --warm-orange: #e8a862;
-  --warm-brown: #8b6914;
-  --soft-green: #7a9b76;
+
+  /* 水彩画風カラーパレット */
+  --ink-black: #2a2520;
+  --paper-cream: #f5f0e8;
+  --lamp-warm: #ffd591;
+  --lamp-glow: #ffb347;
+  --sepia-light: #d4a574;
+  --sepia-mid: #b8956e;
+  --sepia-dark: #8b6f47;
   --night-blue: #2d3a4a;
-  --lamp-glow: rgba(255, 213, 145, 0.15);
-  --paper-bg: rgba(245, 240, 232, 0.08);
+  --night-deep: #1a2430;
+  --leaf-green: #7a9b76;
+  --coffee-brown: #6b4423;
+
+  /* 透明度付きカラー */
+  --glass-warm: rgba(255, 213, 145, 0.08);
+  --glass-paper: rgba(245, 240, 232, 0.06);
+  --border-sepia: rgba(212, 165, 116, 0.25);
+  --shadow-warm: rgba(139, 111, 71, 0.3);
 }
 
 @theme inline {
@@ -32,9 +42,9 @@ body {
   overflow-x: hidden;
 }
 
-/* スクロールバーのスタイル */
+/* スクロールバー - インクのような */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -42,12 +52,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(212, 165, 116, 0.3);
-  border-radius: 3px;
+  background: linear-gradient(180deg, rgba(212, 165, 116, 0.4), rgba(139, 111, 71, 0.3));
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(212, 165, 116, 0.5);
+  background: linear-gradient(180deg, rgba(212, 165, 116, 0.6), rgba(139, 111, 71, 0.5));
 }
 
 /* フォーカス時のアウトライン */
@@ -56,45 +66,170 @@ button:focus {
   outline: none;
 }
 
-/* アニメーション */
-@keyframes pulse {
+/* ======================================
+   水彩画風アニメーション
+   ====================================== */
+
+/* ランプの光の揺らぎ - より自然に */
+@keyframes lamp-flicker {
   0%, 100% {
+    filter: drop-shadow(0 0 12px rgba(255, 179, 71, 0.5));
     opacity: 1;
+  }
+  25% {
+    filter: drop-shadow(0 0 14px rgba(255, 179, 71, 0.55));
+    opacity: 0.98;
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgba(255, 179, 71, 0.45));
+    opacity: 0.96;
+  }
+  75% {
+    filter: drop-shadow(0 0 13px rgba(255, 179, 71, 0.52));
+    opacity: 0.99;
+  }
+}
+
+.lamp-flicker {
+  animation: lamp-flicker 4s ease-in-out infinite;
+}
+
+/* インクが滲むような効果 */
+@keyframes ink-spread {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+.ink-spread {
+  animation: ink-spread 0.5s ease-out forwards;
+}
+
+/* 紙がめくれるような hover */
+@keyframes paper-lift {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  100% {
+    transform: translateY(-2px) rotate(-0.5deg);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  }
+}
+
+/* 呼吸するような pulse */
+@keyframes gentle-pulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.gentle-pulse {
+  animation: gentle-pulse 3s ease-in-out infinite;
+}
+
+/* コーヒーの湯気のような */
+@keyframes steam {
+  0% {
+    opacity: 0.3;
+    transform: translateY(0) scaleX(1);
   }
   50% {
     opacity: 0.5;
+    transform: translateY(-8px) scaleX(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px) scaleX(0.8);
   }
 }
 
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
+/* ======================================
+   水彩画風ユーティリティクラス
+   ====================================== */
 
-/* ランプのような温かいグロー */
-@keyframes lamp-glow {
-  0%, 100% {
-    filter: drop-shadow(0 0 8px rgba(255, 200, 120, 0.4));
-  }
-  50% {
-    filter: drop-shadow(0 0 12px rgba(255, 200, 120, 0.6));
-  }
-}
-
-.lamp-glow {
-  animation: lamp-glow 3s ease-in-out infinite;
-}
-
-/* 紙のようなテクスチャ背景 */
+/* 和紙のようなテクスチャ背景 */
 .paper-texture {
-  background: linear-gradient(135deg,
-    rgba(245, 240, 232, 0.06) 0%,
-    rgba(245, 240, 232, 0.02) 50%,
-    rgba(245, 240, 232, 0.06) 100%
-  );
-  backdrop-filter: blur(8px);
+  background:
+    linear-gradient(135deg,
+      rgba(245, 240, 232, 0.04) 0%,
+      rgba(245, 240, 232, 0.02) 50%,
+      rgba(245, 240, 232, 0.04) 100%
+    );
+  backdrop-filter: blur(12px);
+  position: relative;
 }
 
-/* 温かみのあるボーダー */
-.warm-border {
-  border: 1px solid rgba(212, 165, 116, 0.2);
+.paper-texture::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.015;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* 木製フレームのようなボーダー */
+.wood-frame {
+  border: 1px solid rgba(139, 111, 71, 0.3);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 213, 145, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* セピア調のボーダー */
+.sepia-border {
+  border: 1px solid var(--border-sepia);
+}
+
+/* ランプの光が当たっているような効果 */
+.lamp-lit {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 213, 145, 0.06) 0%,
+    transparent 60%
+  );
+}
+
+/* インクで書いたような文字 */
+.ink-text {
+  color: rgba(245, 240, 232, 0.85);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* 古書のページのような */
+.old-paper {
+  background: linear-gradient(
+    145deg,
+    rgba(60, 50, 40, 0.9) 0%,
+    rgba(50, 42, 34, 0.95) 50%,
+    rgba(45, 38, 30, 0.9) 100%
+  );
+}
+
+/* フェードイン */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
 }
