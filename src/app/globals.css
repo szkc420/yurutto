@@ -167,10 +167,10 @@ button:focus {
       rgba(245, 240, 232, 0.04) 100%
     );
   backdrop-filter: blur(12px);
-  position: relative;
 }
 
-.paper-texture::before {
+/* position: relative が必要な場合のみ適用（fixed要素には使わない） */
+.paper-texture:not(.fixed)::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -178,6 +178,10 @@ button:focus {
   opacity: 0.015;
   pointer-events: none;
   border-radius: inherit;
+}
+
+.paper-texture:not(.fixed) {
+  position: relative;
 }
 
 /* 木製フレームのようなボーダー */
