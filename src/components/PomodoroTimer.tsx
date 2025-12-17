@@ -33,6 +33,11 @@ export default function PomodoroTimer() {
   };
 
   const handleTimerComplete = useCallback(() => {
+    // SE再生
+    const audio = new Audio("/sounds/notification.mp3");
+    audio.volume = 0.5; // 音量は控えめに
+    audio.play().catch((err) => console.error("Audio playback failed:", err));
+
     if (typeof window !== "undefined" && "Notification" in window) {
       if (Notification.permission === "granted") {
         new Notification(mode === "work" ? "休憩時間です！" : "作業再開！");

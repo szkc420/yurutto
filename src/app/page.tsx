@@ -8,6 +8,7 @@ import TaskMemo from "@/components/TaskMemo";
 import AudioPlayer from "@/components/AudioPlayer";
 import LoginModal from "@/components/LoginModal";
 import JournalModal from "@/components/JournalModal";
+import TodayRecordWidget from "@/components/TodayRecordWidget";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Home() {
@@ -34,22 +35,20 @@ export default function Home() {
       {/* メインコンテンツ */}
       <div className="min-h-screen flex pb-16">
         {/* 左上: 時計 */}
-        <div className="fixed left-8 top-8">
+        <div className="fixed left-16 top-10">
           <Clock />
         </div>
 
         {/* 右上: タイマー */}
-        <div className="fixed right-8 top-8">
+        <div className="fixed right-16 top-10">
           <PomodoroTimer />
         </div>
 
-        {/* 左下: タスクメモ */}
-        <div className="fixed left-8 bottom-20">
+        {/* 左下: タスクメモ + ジャーナルボタン */}
+        <div className="fixed left-8 bottom-20 flex flex-col gap-4">
           <TaskMemo />
-        </div>
 
-        {/* 右下: ジャーナルボタン - 古い革表紙の本のようなデザイン */}
-        <div className="fixed right-8 bottom-20">
+          {/* ジャーナルボタン - 古い革表紙の本のようなデザイン */}
           <button
             onClick={handleJournalClick}
             className="group relative flex items-center gap-4 px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105 ink-spread"
@@ -154,6 +153,9 @@ export default function Home() {
 
       {/* 音楽プレイヤー */}
       <AudioPlayer />
+
+      {/* 今日の記録ウィジェット */}
+      <TodayRecordWidget />
 
       {/* ログインモーダル */}
       <LoginModal

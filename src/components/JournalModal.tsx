@@ -4,11 +4,15 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
 import { doc, getDocFromCache, getDocFromServer, setDoc } from "firebase/firestore";
+import MonthlyIntegratedView from "./MonthlyIntegratedView";
+import MonthlyTasks from "./MonthlyTasks";
 
 interface JournalModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+type ViewMode = "daily" | "monthly";
 
 interface JournalEntry {
   diary: string;
@@ -32,7 +36,9 @@ const withTimeout = <T,>(promise: Promise<T>, ms: number): Promise<T> => {
 
 export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
   const { user, signOut } = useAuth();
+  const [viewMode, setViewMode] = useState<ViewMode>("daily");
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [diary, setDiary] = useState("");
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -308,7 +314,22 @@ export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
     setSelectedDate(newDate);
   };
 
+  const changeMonth = (months: number) => {
+    const newMonth = new Date(selectedMonth);
+    newMonth.setMonth(newMonth.getMonth() + months);
+    setSelectedMonth(newMonth);
+  };
+
+  const formatMonthDisplay = (date: Date) => {
+    return date.toLocaleDateString("ja-JP", {
+      year: "numeric",
+      month: "long",
+    });
+  };
+
   const isToday = formatDateKey(selectedDate) === formatDateKey(new Date());
+  const isCurrentMonth = selectedMonth.getFullYear() === new Date().getFullYear() &&
+    selectedMonth.getMonth() === new Date().getMonth();
 
   // クリーンアップ
   useEffect(() => {
@@ -334,7 +355,7 @@ export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
 
       {/* モーダル - 古い革表紙の日記帳 */}
       <div
-        className="relative w-full max-w-2xl mx-4 max-h-[85vh] overflow-hidden flex flex-col ink-spread"
+        className="relative w-full max-w-5xl mx-4 max-h-[90vh] overflow-hidden flex flex-col ink-spread"
         style={{
           background: "linear-gradient(165deg, rgba(55, 48, 40, 0.98) 0%, rgba(42, 36, 28, 0.99) 50%, rgba(50, 42, 34, 0.98) 100%)",
           borderRadius: "16px",
@@ -423,7 +444,36 @@ export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
           </div>
         </div>
 
-        {/* 日付ナビゲーション - ページをめくるような */}
+        {/* ビュー切り替えタブ */}
+        <div
+          className="flex items-center gap-1 px-8 py-2"
+          style={{ borderBottom: "1px solid rgba(139, 111, 71, 0.15)" }}
+        >
+          <button
+            onClick={() => setViewMode("daily")}
+            className="px-4 py-1.5 rounded-lg text-sm transition-all"
+            style={{
+              background: viewMode === "daily" ? "rgba(255, 213, 145, 0.12)" : "transparent",
+              color: viewMode === "daily" ? "#ffd591" : "rgba(212, 165, 116, 0.5)",
+              border: viewMode === "daily" ? "1px solid rgba(255, 213, 145, 0.25)" : "1px solid transparent"
+            }}
+          >
+            日別
+          </button>
+          <button
+            onClick={() => setViewMode("monthly")}
+            className="px-4 py-1.5 rounded-lg text-sm transition-all"
+            style={{
+              background: viewMode === "monthly" ? "rgba(255, 213, 145, 0.12)" : "transparent",
+              color: viewMode === "monthly" ? "#ffd591" : "rgba(212, 165, 116, 0.5)",
+              border: viewMode === "monthly" ? "1px solid rgba(255, 213, 145, 0.25)" : "1px solid transparent"
+            }}
+          >
+            月間
+          </button>
+        </div>
+
+        {/* 日付/月ナビゲーション */}
         <div
           className="flex items-center justify-between px-8 py-3"
           style={{
@@ -431,252 +481,306 @@ export default function JournalModal({ isOpen, onClose }: JournalModalProps) {
             borderBottom: "1px dashed rgba(139, 111, 71, 0.2)"
           }}
         >
-          <button
-            onClick={() => changeDate(-1)}
-            className="p-2 rounded-lg transition-all hover:scale-110"
-            style={{ color: "rgba(212, 165, 116, 0.6)" }}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <div className="text-center">
-            <div
-              className="font-medium tracking-wide"
-              style={{ color: "#ffd591", textShadow: "0 1px 2px rgba(0, 0, 0, 0.3)" }}
-            >
-              {formatDisplayDate(selectedDate)}
-            </div>
-            {isToday && (
-              <span
-                className="text-xs"
-                style={{ color: "rgba(122, 155, 118, 0.7)" }}
+          {viewMode === "daily" ? (
+            <>
+              <button
+                onClick={() => changeDate(-1)}
+                className="p-2 rounded-lg transition-all hover:scale-110"
+                style={{ color: "rgba(212, 165, 116, 0.6)" }}
               >
-                今日
-              </span>
-            )}
-          </div>
-          <button
-            onClick={() => changeDate(1)}
-            className="p-2 rounded-lg transition-all hover:scale-110"
-            style={{ color: "rgba(212, 165, 116, 0.6)" }}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div className="text-center">
+                <div
+                  className="font-medium tracking-wide"
+                  style={{ color: "#ffd591", textShadow: "0 1px 2px rgba(0, 0, 0, 0.3)" }}
+                >
+                  {formatDisplayDate(selectedDate)}
+                </div>
+                {isToday && (
+                  <span
+                    className="text-xs"
+                    style={{ color: "rgba(122, 155, 118, 0.7)" }}
+                  >
+                    今日
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => changeDate(1)}
+                className="p-2 rounded-lg transition-all hover:scale-110"
+                style={{ color: "rgba(212, 165, 116, 0.6)" }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => changeMonth(-1)}
+                className="p-2 rounded-lg transition-all hover:scale-110"
+                style={{ color: "rgba(212, 165, 116, 0.6)" }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div className="text-center">
+                <div
+                  className="font-medium tracking-wide"
+                  style={{ color: "#ffd591", textShadow: "0 1px 2px rgba(0, 0, 0, 0.3)" }}
+                >
+                  {formatMonthDisplay(selectedMonth)}
+                </div>
+                {isCurrentMonth && (
+                  <span
+                    className="text-xs"
+                    style={{ color: "rgba(122, 155, 118, 0.7)" }}
+                  >
+                    今月
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => changeMonth(1)}
+                className="p-2 rounded-lg transition-all hover:scale-110"
+                style={{ color: "rgba(212, 165, 116, 0.6)" }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          )}
         </div>
 
         {/* コンテンツ - 古い紙のようなページ */}
         <div className="flex-1 overflow-y-auto p-6 pl-8 space-y-5">
-          {/* 読み込み失敗警告 */}
-          {loadFailed && (
-            <div
-              className="rounded-xl p-4 text-sm"
-              style={{
-                background: "rgba(200, 150, 80, 0.1)",
-                border: "1px solid rgba(200, 150, 80, 0.3)"
-              }}
-            >
-              <div className="mb-3" style={{ color: "rgba(255, 200, 150, 0.9)" }}>
-                データの読み込みに失敗しました。サーバーに既存のデータがある可能性があります。
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={retryLoad}
-                  disabled={syncing}
-                  className="px-4 py-1.5 rounded-lg transition-all hover:scale-105 disabled:opacity-50"
-                  style={{
-                    background: "rgba(200, 150, 80, 0.2)",
-                    border: "1px solid rgba(200, 150, 80, 0.4)",
-                    color: "rgba(255, 200, 150, 0.9)"
-                  }}
-                >
-                  {syncing ? "読み込み中..." : "再読み込み"}
-                </button>
-                {hasUserEdited && (
-                  <button
-                    onClick={forceSave}
-                    className="px-4 py-1.5 rounded-lg transition-all hover:scale-105"
-                    style={{
-                      background: "rgba(180, 100, 80, 0.2)",
-                      border: "1px solid rgba(180, 100, 80, 0.4)",
-                      color: "rgba(255, 160, 140, 0.9)"
-                    }}
-                  >
-                    現在の内容で上書き保存
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {loading ? (
-            <div className="space-y-5 animate-pulse">
-              <div>
-                <div className="h-4 w-28 rounded mb-3" style={{ background: "rgba(139, 111, 71, 0.2)" }} />
-                <div className="h-36 rounded-xl" style={{ background: "rgba(42, 37, 32, 0.5)" }} />
-              </div>
-              <div>
-                <div className="h-4 w-20 rounded mb-3" style={{ background: "rgba(139, 111, 71, 0.2)" }} />
-                <div className="rounded-xl p-4 space-y-3" style={{ background: "rgba(42, 37, 32, 0.5)" }}>
-                  <div className="h-5 rounded w-3/4" style={{ background: "rgba(139, 111, 71, 0.15)" }} />
-                  <div className="h-5 rounded w-1/2" style={{ background: "rgba(139, 111, 71, 0.15)" }} />
-                </div>
-              </div>
-            </div>
-          ) : (
+          {viewMode === "daily" ? (
             <>
-              {/* 日記セクション - 万年筆で書いたような */}
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <svg className="w-4 h-4" fill="none" stroke="rgba(255, 213, 145, 0.6)" viewBox="0 0 24 24" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                  </svg>
-                  <label
-                    className="text-sm tracking-wide"
-                    style={{ color: "rgba(212, 165, 116, 0.7)" }}
-                  >
-                    今日の出来事
-                  </label>
-                </div>
-                <textarea
-                  value={diary}
-                  onChange={(e) => handleDiaryChange(e.target.value)}
-                  placeholder="今日はどんな一日でしたか？"
-                  className="w-full h-36 rounded-xl px-4 py-3 text-sm transition-all resize-none"
-                  style={{
-                    background: "rgba(42, 37, 32, 0.6)",
-                    border: "1px solid rgba(139, 111, 71, 0.25)",
-                    color: "rgba(245, 240, 232, 0.9)",
-                    caretColor: "#ffd591"
-                  }}
-                />
-              </div>
-
-              {/* タスクセクション - チェックリスト */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="rgba(255, 213, 145, 0.6)" viewBox="0 0 24 24" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <label
-                      className="text-sm tracking-wide"
-                      style={{ color: "rgba(212, 165, 116, 0.7)" }}
-                    >
-                      タスク
-                    </label>
-                  </div>
-                  {isToday && (
-                    <button
-                      onClick={copyTasksFromWorkScreen}
-                      className="text-xs transition-all hover:scale-105"
-                      style={{ color: "rgba(212, 165, 116, 0.5)" }}
-                    >
-                      作業画面からコピー
-                    </button>
-                  )}
-                </div>
+              {/* 読み込み失敗警告 */}
+              {loadFailed && (
                 <div
-                  className="rounded-xl p-4 space-y-2"
+                  className="rounded-xl p-4 text-sm"
                   style={{
-                    background: "rgba(42, 37, 32, 0.6)",
-                    border: "1px solid rgba(139, 111, 71, 0.25)"
+                    background: "rgba(200, 150, 80, 0.1)",
+                    border: "1px solid rgba(200, 150, 80, 0.3)"
                   }}
                 >
-                  {tasks.map((task, index) => (
-                    <div
-                      key={task.id}
-                      className="flex items-center gap-3 py-2 group"
+                  <div className="mb-3" style={{ color: "rgba(255, 200, 150, 0.9)" }}>
+                    データの読み込みに失敗しました。サーバーに既存のデータがある可能性があります。
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={retryLoad}
+                      disabled={syncing}
+                      className="px-4 py-1.5 rounded-lg transition-all hover:scale-105 disabled:opacity-50"
                       style={{
-                        animation: `fadeIn 0.3s ease ${index * 0.05}s both`,
-                        borderBottom: "1px dashed rgba(139, 111, 71, 0.15)"
+                        background: "rgba(200, 150, 80, 0.2)",
+                        border: "1px solid rgba(200, 150, 80, 0.4)",
+                        color: "rgba(255, 200, 150, 0.9)"
                       }}
                     >
+                      {syncing ? "読み込み中..." : "再読み込み"}
+                    </button>
+                    {hasUserEdited && (
                       <button
-                        onClick={() => toggleTask(task.id)}
-                        className="w-5 h-5 rounded flex-shrink-0 flex items-center justify-center transition-all"
+                        onClick={forceSave}
+                        className="px-4 py-1.5 rounded-lg transition-all hover:scale-105"
                         style={{
-                          background: task.completed
-                            ? "linear-gradient(135deg, rgba(122, 155, 118, 0.5), rgba(168, 213, 186, 0.4))"
-                            : "transparent",
-                          border: task.completed
-                            ? "1.5px solid rgba(168, 213, 186, 0.6)"
-                            : "1.5px solid rgba(212, 165, 116, 0.4)",
-                          boxShadow: task.completed ? "0 0 8px rgba(122, 155, 118, 0.3)" : "none"
+                          background: "rgba(180, 100, 80, 0.2)",
+                          border: "1px solid rgba(180, 100, 80, 0.4)",
+                          color: "rgba(255, 160, 140, 0.9)"
                         }}
                       >
-                        {task.completed && (
-                          <svg className="w-3 h-3" fill="none" stroke="#f0fff5" viewBox="0 0 24 24" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </button>
-                      <span
-                        className="flex-1 text-sm transition-all"
-                        style={{
-                          color: task.completed ? "rgba(212, 165, 116, 0.35)" : "rgba(245, 240, 232, 0.85)",
-                          textDecorationLine: task.completed ? "line-through" : "none",
-                          textDecorationStyle: "solid",
-                          textDecorationColor: "rgba(139, 111, 71, 0.4)"
-                        }}
-                      >
-                        {task.text}
-                      </span>
-                      <button
-                        onClick={() => deleteTask(task.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1 transition-all hover:scale-110"
-                        style={{ color: "rgba(212, 165, 116, 0.4)" }}
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-
-                  {/* 新規タスク入力 */}
-                  <div className="flex items-center gap-3 pt-2">
-                    <div
-                      className="w-5 h-5 rounded flex-shrink-0"
-                      style={{ border: "1.5px dashed rgba(139, 111, 71, 0.3)" }}
-                    />
-                    <input
-                      type="text"
-                      value={newTaskText}
-                      onChange={(e) => setNewTaskText(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          addTask();
-                        }
-                      }}
-                      placeholder="新しいタスクを追加..."
-                      className="flex-1 bg-transparent text-sm focus:outline-none"
-                      style={{
-                        color: "rgba(245, 240, 232, 0.85)",
-                        caretColor: "#ffd591"
-                      }}
-                    />
-                    {newTaskText.trim() && (
-                      <button
-                        onClick={addTask}
-                        className="p-1 rounded-lg transition-all hover:scale-110"
-                        style={{
-                          color: "#ffd591",
-                          background: "rgba(255, 213, 145, 0.1)"
-                        }}
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                        </svg>
+                        現在の内容で上書き保存
                       </button>
                     )}
                   </div>
                 </div>
-              </div>
+              )}
+
+              {loading ? (
+                <div className="space-y-5 animate-pulse">
+                  <div>
+                    <div className="h-4 w-28 rounded mb-3" style={{ background: "rgba(139, 111, 71, 0.2)" }} />
+                    <div className="h-36 rounded-xl" style={{ background: "rgba(42, 37, 32, 0.5)" }} />
+                  </div>
+                  <div>
+                    <div className="h-4 w-20 rounded mb-3" style={{ background: "rgba(139, 111, 71, 0.2)" }} />
+                    <div className="rounded-xl p-4 space-y-3" style={{ background: "rgba(42, 37, 32, 0.5)" }}>
+                      <div className="h-5 rounded w-3/4" style={{ background: "rgba(139, 111, 71, 0.15)" }} />
+                      <div className="h-5 rounded w-1/2" style={{ background: "rgba(139, 111, 71, 0.15)" }} />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* 日記セクション - 万年筆で書いたような */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <svg className="w-4 h-4" fill="none" stroke="rgba(255, 213, 145, 0.6)" viewBox="0 0 24 24" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                      </svg>
+                      <label
+                        className="text-sm tracking-wide"
+                        style={{ color: "rgba(212, 165, 116, 0.7)" }}
+                      >
+                        今日の出来事
+                      </label>
+                    </div>
+                    <textarea
+                      value={diary}
+                      onChange={(e) => handleDiaryChange(e.target.value)}
+                      placeholder="今日はどんな一日でしたか？"
+                      className="w-full h-36 rounded-xl px-4 py-3 text-sm transition-all resize-none"
+                      style={{
+                        background: "rgba(42, 37, 32, 0.6)",
+                        border: "1px solid rgba(139, 111, 71, 0.25)",
+                        color: "rgba(245, 240, 232, 0.9)",
+                        caretColor: "#ffd591"
+                      }}
+                    />
+                  </div>
+
+                  {/* タスクセクション - チェックリスト */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="rgba(255, 213, 145, 0.6)" viewBox="0 0 24 24" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <label
+                          className="text-sm tracking-wide"
+                          style={{ color: "rgba(212, 165, 116, 0.7)" }}
+                        >
+                          タスク
+                        </label>
+                      </div>
+                      {isToday && (
+                        <button
+                          onClick={copyTasksFromWorkScreen}
+                          className="text-xs transition-all hover:scale-105"
+                          style={{ color: "rgba(212, 165, 116, 0.5)" }}
+                        >
+                          作業画面からコピー
+                        </button>
+                      )}
+                    </div>
+                    <div
+                      className="rounded-xl p-4 space-y-2"
+                      style={{
+                        background: "rgba(42, 37, 32, 0.6)",
+                        border: "1px solid rgba(139, 111, 71, 0.25)"
+                      }}
+                    >
+                      {tasks.map((task, index) => (
+                        <div
+                          key={task.id}
+                          className="flex items-center gap-3 py-2 group"
+                          style={{
+                            animation: `fadeIn 0.3s ease ${index * 0.05}s both`,
+                            borderBottom: "1px dashed rgba(139, 111, 71, 0.15)"
+                          }}
+                        >
+                          <button
+                            onClick={() => toggleTask(task.id)}
+                            className="w-5 h-5 rounded flex-shrink-0 flex items-center justify-center transition-all"
+                            style={{
+                              background: task.completed
+                                ? "linear-gradient(135deg, rgba(122, 155, 118, 0.5), rgba(168, 213, 186, 0.4))"
+                                : "transparent",
+                              border: task.completed
+                                ? "1.5px solid rgba(168, 213, 186, 0.6)"
+                                : "1.5px solid rgba(212, 165, 116, 0.4)",
+                              boxShadow: task.completed ? "0 0 8px rgba(122, 155, 118, 0.3)" : "none"
+                            }}
+                          >
+                            {task.completed && (
+                              <svg className="w-3 h-3" fill="none" stroke="#f0fff5" viewBox="0 0 24 24" strokeWidth={3}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </button>
+                          <span
+                            className="flex-1 text-sm transition-all"
+                            style={{
+                              color: task.completed ? "rgba(212, 165, 116, 0.35)" : "rgba(245, 240, 232, 0.85)",
+                              textDecorationLine: task.completed ? "line-through" : "none",
+                              textDecorationStyle: "solid",
+                              textDecorationColor: "rgba(139, 111, 71, 0.4)"
+                            }}
+                          >
+                            {task.text}
+                          </span>
+                          <button
+                            onClick={() => deleteTask(task.id)}
+                            className="opacity-0 group-hover:opacity-100 p-1 transition-all hover:scale-110"
+                            style={{ color: "rgba(212, 165, 116, 0.4)" }}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+
+                      {/* 新規タスク入力 */}
+                      <div className="flex items-center gap-3 pt-2">
+                        <div
+                          className="w-5 h-5 rounded flex-shrink-0"
+                          style={{ border: "1.5px dashed rgba(139, 111, 71, 0.3)" }}
+                        />
+                        <input
+                          type="text"
+                          value={newTaskText}
+                          onChange={(e) => setNewTaskText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              addTask();
+                            }
+                          }}
+                          placeholder="新しいタスクを追加..."
+                          className="flex-1 bg-transparent text-sm focus:outline-none"
+                          style={{
+                            color: "rgba(245, 240, 232, 0.85)",
+                            caretColor: "#ffd591"
+                          }}
+                        />
+                        {newTaskText.trim() && (
+                          <button
+                            onClick={addTask}
+                            className="p-1 rounded-lg transition-all hover:scale-110"
+                            style={{
+                              color: "#ffd591",
+                              background: "rgba(255, 213, 145, 0.1)"
+                            }}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </>
+          ) : (
+            /* 月間ビュー */
+            <div className="space-y-6">
+              {/* 統合ビュー（2軸グラフ + 日付 + デイリートラッカー） */}
+              <MonthlyIntegratedView selectedMonth={selectedMonth} />
+
+              {/* 月間タスク */}
+              <MonthlyTasks selectedMonth={selectedMonth} />
+            </div>
           )}
         </div>
 

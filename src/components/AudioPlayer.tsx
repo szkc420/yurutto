@@ -1,24 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface AudioSource {
   id: string;
   name: string;
-  type: "youtube" | "spotify";
+  type: "youtube" | "spotify" | "local";
   embedUrl: string;
 }
 
 const MUSIC_PRESETS: AudioSource[] = [
   {
+    id: "local-lofi1",
+    name: "Lo-Fi 1",
+    type: "local",
+    embedUrl: "/sounds/songs/lo-fi1.mp3",
+  },
+  {
+    id: "local-lofi2",
+    name: "Lo-Fi 2",
+    type: "local",
+    embedUrl: "/sounds/songs/lo-fi2.mp3",
+  },
+  {
     id: "lofi-girl",
-    name: "Lofi Girl",
+    name: "Lofi Girl (YouTube)",
     type: "youtube",
     embedUrl: "https://www.youtube.com/embed/jfKfPfyJRdk",
   },
   {
     id: "chillhop",
-    name: "Chillhop Radio",
+    name: "Chillhop (YouTube)",
     type: "youtube",
     embedUrl: "https://www.youtube.com/embed/5yx6BWlEVcY",
   },
@@ -55,6 +67,30 @@ export default function AudioPlayer() {
   const [showAmbientPlayer, setShowAmbientPlayer] = useState(false);
   const [customUrl, setCustomUrl] = useState("");
   const [customType, setCustomType] = useState<"music" | "ambient">("music");
+  const [localMusicVolume, setLocalMusicVolume] = useState(0.5);
+
+  // ローカル音楽再生用のref（JSXのaudio要素を参照）
+  const localMusicRef = useRef<HTMLAudioElement>(null);
+
+  // 再生/停止の制御
+  useEffect(() => {
+    const audio = localMusicRef.current;
+    if (!audio || selectedMusic?.type !== "local") return;
+
+    if (isMusicPlaying) {
+      audio.play().catch(console.error);
+    } else {
+      audio.pause();
+    }
+  }, [isMusicPlaying, selectedMusic?.type, selectedMusic?.embedUrl]);
+
+  // 音量の制御
+  useEffect(() => {
+    const audio = localMusicRef.current;
+    if (audio) {
+      audio.volume = localMusicVolume;
+    }
+  }, [localMusicVolume, selectedMusic?.embedUrl]);
 
   const convertToEmbedUrl = (url: string): string | null => {
     const youtubeMatch = url.match(
@@ -355,6 +391,29 @@ export default function AudioPlayer() {
                 </button>
               ))}
             </div>
+            {/* ローカル音楽の音量スライダー */}
+            {selectedMusic?.type === "local" && (
+              <div className="mt-3 flex items-center gap-3">
+                <svg className="w-4 h-4" fill="none" stroke="rgba(212, 165, 116, 0.6)" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+                </svg>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={localMusicVolume}
+                  onChange={(e) => setLocalMusicVolume(parseFloat(e.target.value))}
+                  className="flex-1 h-1 rounded-full appearance-none cursor-pointer"
+                  style={{
+                    background: `linear-gradient(to right, rgba(255, 213, 145, 0.7) ${localMusicVolume * 100}%, rgba(139, 111, 71, 0.3) ${localMusicVolume * 100}%)`
+                  }}
+                />
+                <span className="text-xs" style={{ color: "rgba(212, 165, 116, 0.5)", minWidth: "2rem" }}>
+                  {Math.round(localMusicVolume * 100)}%
+                </span>
+              </div>
+            )}
           </div>
 
           {/* 環境音セクション */}
@@ -501,10 +560,10 @@ export default function AudioPlayer() {
             </button>
           </div>
           <iframe
-            src={`${selectedMusic.embedUrl}?autoplay=1`}
+            src={`${selectedMusic.embedUrl}?autoplay=1&controls=1`}
             allow="autoplay; encrypted-media"
             title="Music Player"
-            className="w-80 h-20"
+            className="w-96 h-56"
           />
         </div>
       )}
@@ -512,7 +571,7 @@ export default function AudioPlayer() {
       {/* 環境音プレイヤー（フローティング） */}
       {showAmbientPlayer && isAmbientPlaying && selectedAmbient && (
         <div
-          className="fixed bottom-20 right-[22rem] paper-texture wood-frame rounded-2xl overflow-hidden ink-spread"
+          className="fixed bottom-20 right-[26rem] paper-texture wood-frame rounded-2xl overflow-hidden ink-spread"
           style={{
             background: "linear-gradient(155deg, rgba(55, 48, 40, 0.98), rgba(40, 34, 28, 0.99))"
           }}
@@ -535,16 +594,26 @@ export default function AudioPlayer() {
             </button>
           </div>
           <iframe
-            src={`${selectedAmbient.embedUrl}?autoplay=1`}
+            src={`${selectedAmbient.embedUrl}?autoplay=1&controls=1`}
             allow="autoplay; encrypted-media"
             title="Ambient Player"
-            className="w-80 h-20"
+            className="w-96 h-56"
           />
         </div>
       )}
 
-      {/* 隠れたiframeプレイヤー（プレイヤー非表示時） */}
-      {!showMusicPlayer && isMusicPlaying && selectedMusic && (
+      {/* ローカル音楽用のaudio要素 */}
+      {selectedMusic?.type === "local" && (
+        <audio
+          ref={localMusicRef}
+          src={selectedMusic.embedUrl}
+          loop
+          style={{ display: 'none' }}
+        />
+      )}
+
+      {/* 隠れたiframeプレイヤー（プレイヤー非表示時、ローカル以外） */}
+      {!showMusicPlayer && isMusicPlaying && selectedMusic && selectedMusic.type !== "local" && (
         <div className="hidden">
           <iframe
             src={`${selectedMusic.embedUrl}?autoplay=1`}
